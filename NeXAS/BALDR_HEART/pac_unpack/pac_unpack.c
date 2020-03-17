@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
 {
 	char* InputFileName = argv[1];
 	setlocale(LC_ALL, "chs");
-	printf("project：Niflheim-BALDR HEART\n用于解包BH的pac文件。\n将pac文件拖到程序上。\nby Darkness-TX 2016.12.01\n\n添加新版NeXAS封包支持\nby AyamiKaze 2020.03.18\n\n");
+	printf("project：Niflheim-BALDR HEART\n用于解包BH的pac文件。\n将pac文件拖到程序上。\nby Darkness-TX 2016.12.01\n\n添加新版NeXAS封包支持\nby AyamiKaze 2020.03.18\n\n\n");
 	ReadIndex(InputFileName);
 	UnpackFile(InputFileName);
 	printf("已完成，总文件数%d\n", FileNum);
