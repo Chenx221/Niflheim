@@ -1,7 +1,11 @@
 /*
-用于解包BH的pac文件
+用于封包pac文件
 made by Darkness-TX
 2016.12.01
+
+添加新版NeXAS的支持
+upload by AyamiKaze
+2020.03.18
 */
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
@@ -11,8 +15,13 @@ made by Darkness-TX
 #include <direct.h>
 #include <Windows.h>
 #include <zlib.h>
+#include"zstd.h"
+#include"zdict.h"
+#include"zstd_errors.h"
 #include <locale.h>
 #include "BH_huffman_comp.h"
+
+#pragma comment(lib, "libzstd.lib")
 
 typedef unsigned char  unit8;
 typedef unsigned short unit16;
@@ -22,9 +31,9 @@ unit32 FileNum = 0;//总文件数，初始计数为0
 
 struct header
 {
-	unit8 magic[4];//PAC\0
-	unit32 num;
-	unit32 mode;//BH中是4
+	unit8 magic[4];//PAC\0 -> PAC\x7F
+	unit32 num;//文件数量
+	unit32 mode;//BH中是4，oniama中是7
 }pac_header;
 
 struct index
@@ -161,9 +170,9 @@ void PackFile(char *fname)
 	unit32 i, compsize;
 	unit8 *udata, *cdata, dstname[200];
 	wchar_t bname[5];
-	sprintf(pac_header.magic, "PAC\0");
+	sprintf(pac_header.magic, "PAC\x7F");
 	pac_header.num = FileNum;
-	pac_header.mode = 4;
+	pac_header.mode = 7;
 	pac_header.mode &= 0xFF;
 	sprintf(dstname, "%s.pac", fname);
 	_chdir("..");
@@ -186,7 +195,7 @@ void PackFile(char *fname)
 		}
 		else
 		{
-			compress2(cdata, &Index[i].ComSize, udata, Index[i].FileSize, Z_DEFAULT_COMPRESSION);
+			ZSTD_compress(cdata, &Index[i].ComSize, udata, Index[i].FileSize, ZSTD_btultra2);
 			fwrite(cdata, 1, Index[i].ComSize, dst);
 		}
 		free(cdata);
@@ -218,12 +227,13 @@ void PackFile(char *fname)
 
 int main(int argc, char *argv[])
 {
+	char* InputFileName = argv[1];
 	setlocale(LC_ALL, "chs");
-	printf("project：Niflheim-BALDR HEART\n用于封包BH的pac文件。\n将文件夹拖到程序上。\nby Darkness-TX 2016.12.02\n\n");
+	printf("project：Niflheim-BALDR HEART\n用于封包BH的pac文件。\n将文件夹拖到程序上。\nby Darkness-TX 2016.12.02\n\n添加新版NeXAS封包支持\nby AyamiKaze 2020.03.18\n\n\n");
 	//ReadIndex(argv[1]);
 	//packFileNoIndex(argv[1]);
-	process_dir(argv[1]);
-	PackFile(argv[1]);
+	process_dir(InputFileName);
+	PackFile(InputFileName);
 	printf("已完成，总文件数%d\n", FileNum);
 	system("pause");
 	return 0;
